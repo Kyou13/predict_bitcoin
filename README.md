@@ -8,3 +8,5 @@
   - Twitterのトレンドを入れる
 
 - PlanはProjectに記載
+
+- [ToDo,Plan](https://github.com/Kyou13/predict_bitcoin/Memo.md)
