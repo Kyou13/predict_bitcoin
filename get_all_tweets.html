@@ -1,0 +1,37 @@
+<html lang="en"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Get tweet </title>
+<style type="text/css">
+</style>
+<script src="lib/oauth.js"></script> 
+<script src="lib/sha1.js"></script>
+<script src="getTwitterAPI.js"></script>
+  </head>
+  <body>
+  <script type="text/javascript">
+    var screen_name = "XXXXXXXXXXX";
+var count = 50;
+var max_id = 999999999999999999;
+var max_id_old;
+var url = "https://api.twitter.com/1.1/search/universal.json?q=from%3A" + screen_name  + " max_id%3A" + max_id + "&count=" + count +  "&modules=status";
+
+
+var hoge = setInterval(get_tweet,5000);
+function get_tweet(){
+      console.log(max_id);
+      url = "https://api.twitter.com/1.1/search/universal.json?q=from%3A" + screen_name  + " max_id%3A" + max_id + "&count=" + count +"&modules=status";
+      getTwitterAPI(url,"get_all_tweet");
+      if(max_id == max_id_old){
+                clearInterval(hoge);    
+            }
+      max_id_old = max_id;
+}
+function get_all_tweet(json){
+     json.modules.forEach(function(d,i){
+               console.log(d.status.data);
+               max_id = d.status.data.id;
+          });
+}
+  </script>
+  </body>
+</html>
