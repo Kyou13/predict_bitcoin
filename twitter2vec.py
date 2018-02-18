@@ -6,6 +6,7 @@ import sys
 import MeCab
 import collections
 import argparse
+import re
 from gensim import models
 from gensim.models.doc2vec import TaggedDocument
 from gensim.utils import simple_preprocess as preprocess
@@ -19,10 +20,13 @@ def get_all_files(directory):
 
 # ファイルから文章取得
 # 文章整形
-def read_docment(path, name):
+def read_docment(path):
     with open(path, 'r', encoding='utf-8', errors='ignore') as f:
         lines = f.readlines()
 
+    return lines 
+
+def trim_doc(lines,name):
     sep_docs = collections.OrderedDict()
     sep_doc = []
 
@@ -32,10 +36,13 @@ def read_docment(path, name):
             sep_doc = []
 
         # 日時情報取得
-        if lines[s][-5:-2] == "201":
+        elif lines[s][-5:-2] == "201":
             day = lines[s][4:19]
             tag = day + " @ " + name
             continue
+
+        else :
+            lines[s] = re.sub('https?://[\w/:%#\$&\?\(\)~\.=\+\-]+','',lines[s])
 
         sep_doc.append(lines[s])
     
@@ -100,7 +107,9 @@ if __name__ == '__main__':
     if args.t is False : 
         for i in get_all_files('./database'):
             name = i.split('/')[2][:-4]
-            docs = read_docment(i,name)
+            raw_docs = read_docment(i)
+            docs = trim_doc(raw_docs,name)
+            
 
         # ジェネレータ
         sentences = corpus_to_sentences(docs.values(),docs.keys())
