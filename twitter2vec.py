@@ -32,7 +32,7 @@ def trim_doc(lines,name):
     sep_docs = collections.OrderedDict()
     sep_doc = []
 
-    with open("./testfile.txt",'w') as f:
+    with open("./tweet_date_list/testfile_{}.txt".format(name),'w') as f:
 
         # 文章ごとに区切る
         for s in range(len(lines)):
@@ -46,7 +46,6 @@ def trim_doc(lines,name):
                 day = lines[s][4:19]
                 tag = day + " @ " + name
                 f.write("{}\n".format(tag))
-                
                 continue
 
             # ツイート文章
@@ -70,11 +69,12 @@ def split_into_words(doc, name=''):
         # 動詞,形容詞,名詞のみを抽出
         if len(chunks) > 3 and (chunks[3].startswith('動詞') or chunks[3].startswith('形容詞') or (chunks[3].startswith('名詞') and not chunks[3].startswith('名詞-数'))):
             words.append(chunks[0])
+    print(words)
     return TaggedDocument(words=words, tags=[name])
 
 def corpus_to_sentences(docs, names):
     for idx,(doc, name) in enumerate(zip(docs, names)):
-        sys.stdout.write('\r前処理中{} / {}'.format(idx, doc))
+        sys.stdout.write('\rProcessing:{} {}'.format(idx, doc))
         yield split_into_words(doc, name)
 
 # モデルトレーニング
@@ -102,6 +102,7 @@ def train(sentences):
 def search_similar_texts(words):
 
     model = models.Doc2Vec.load('doc2vec.model')
+    model.seed = 1
     x = model.infer_vector(words)
     # 引数はid
     most_similar_texts = model.docvecs.most_similar([x])
@@ -141,7 +142,8 @@ def similarity_texts(words):
 # ツイートした日していない日を区別するindexを作成
 def find_tweet_date(tag_names):
 
-    year_list = date_year(2017)
+    # 2017年の日付を全て挿入したリスト
+    year_list = date_year()
     tweet_list = []
 
     for date in year_list:
@@ -150,7 +152,10 @@ def find_tweet_date(tag_names):
         for tag_name in tag_names:
             tag_name = tag_name.split("@")
             tag_date = dt.datetime.strptime(tag_name[0],"%b %d %H:%M:%S ")
-            tag_date = tag_date.replace(year=2017)
+            if tag_date.month >= 8:
+                tag_date = tag_date.replace(year=2017)
+            else :
+                tag_date = tag_date.replace(year=2018)
             if date.day == tag_date.day and date.month == tag_date.month:
                 tweet_list.append(tag_date)
                 day_find = True
@@ -160,13 +165,14 @@ def find_tweet_date(tag_names):
 
     return tweet_list
 
-def date_year(year):
-    date = dt.datetime(year, 1, 1, 0, 0)
+def date_year():
+    date = dt.datetime(2018, 2, 18, 0, 0)
     year_list = []
-    for i in range(365):
+    for i in range(180):
         year_list.append(date)
-        date += dt.timedelta(days=1)
+        date -= dt.timedelta(days=1)
 
+    year_list = year_list[::-1]
     return year_list
 
 # 類似単語推定
@@ -174,12 +180,21 @@ def search_similar_words(word):
 
     #for word in words:
     if True:
-
         model = models.Doc2Vec.load('doc2vec.model')
         print()
         print(word + ':')
         for result in model.most_similar(word, topn=10):
             print(result[0],result[1])
+
+def add_text():
+
+    with open('./testfile.txt', 'w') as outfile:
+        for i in get_all_files('./tweet_date_list'):
+            with open(i) as infile:
+                outfile.write(infile.read())
+
+
+
 
 if __name__ == '__main__':
 
@@ -189,25 +204,29 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.t is False : 
-        for i in get_all_files('./database_test'):
+        for i in get_all_files('./database'):
             name = i.split('/')[2][:-4]
             raw_docs = read_docment(i) # list
             doc = trim_doc(raw_docs,name)
 
             # ローカルスコープでチェック
+            # 更新する
             if not 'docs' in locals():
                 docs = doc
             else:
                 docs.update(doc)
+        # .txt連結
+        add_text()
 
         # ジェネレータ
         sentences = corpus_to_sentences(docs.values(),docs.keys())
 
         model = train(sentences)
-        model.save('doc2vec.model')
+        model.save('doc2vec_multiple_user_test.model')
     else:
-        test_word = "ビットコインさらに買い増し"
+        test_word = "ビットコイン買う"
         
-        # search_similar_texts(test_word)
+        search_similar_texts(test_word)
+        # npyとして保存
         similarity_texts(test_word)
         # search_similar_words(test_word)

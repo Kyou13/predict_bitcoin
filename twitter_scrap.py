@@ -251,16 +251,7 @@ def search_neg_word(doc):
     for word in pos_words:
         if doc.find(word) != -1:
             return False
-            #find = True
-    # for word in pos_words:
-    #     if doc.find(word) != -1:
-    #         find = True
         
-    # if find or m:
-    #     return True
-    # if find:
-    #     return False
-    # else:
     return True
  
 if __name__ == '__main__':
@@ -269,21 +260,21 @@ if __name__ == '__main__':
     #getter = TweetsGetter.bySearch(u'渋谷')
     
     # ユーザーを指定して取得 （screen_name）
-    screen_name = 'cissan_9984'
+    screen_name = 'IHayato'
     
     getter = TweetsGetter.byUser(screen_name)
  
     cnt = 0
-    f = open('./database_test/{}.txt'.format(screen_name, str), 'w') # 書き込みモードで開く
+    f = open('./database/{}.txt'.format(screen_name, str), 'w') # 書き込みモードで開く
     # 2017年のだけ取得
     year = "2017"
     
     
     for tweet in getter.collect(total = 3000):
         print(tweet['text'])
-        if tweet['created_at'][-4:] == year:
-        # if trim_doc(tweet['text']):
-        # if True:
+        # 年度を指定
+        # if tweet['created_at'][-4:] == year:
+        if True:
             cnt += 1
             print ('------ %d' % cnt)
             print ('{} {} {}'.format(tweet['id'], tweet['created_at'], '@'+tweet['user']['screen_name']))
@@ -293,7 +284,8 @@ if __name__ == '__main__':
             if search_neg_word(tweet['text']):
                 continue
             #URL 除去
-            _tweet = re.sub('https?://[\w/:%#\$&\?\(\)~\.=\+\-]+','',tweet['text'])
+            # _tweet = re.sub('https?://[\w/:%#\$&\?\(\)~\.=\+\-]+','',tweet['text'])
+            _tweet = tweet['text']
             _tweet = _tweet.split('\n')
             text = []
             # ツイート内容から空白行除去
