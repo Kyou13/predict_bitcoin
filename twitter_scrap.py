@@ -8,11 +8,12 @@ import datetime, time, sys
 from abc import ABCMeta, abstractmethod
 import re
 import MeCab
+import os
  
-CK = '8qtcWiBMV7fDxIkvYQ1BfzojW'                             # Consumer Key
-CS = 'mBEMIEHxQC1oTD6tLhibAiwUbCSgc06MZFkdWVPsDpnyqEhMJh'    # Consumer Secret
-AT = '514081197-235p20TizwaS8F4taqFmWWhzfxki7kXIAaUrhUgk'    # Access Token
-AS = 'e6SXRAlAaAfrMLremDFZw1dV73E8Px5Ez49aIKEzPfULl'         # Accesss Token Secert
+CK = os.environ['CK']                             # Consumer Key
+CS = os.environ['CS']    # Consumer Secret
+AT = os.environ['AT']    # Access Token
+AS = os.environ['AS']         # Accesss Token Secert
  
 class TweetsGetter(object):
     __metaclass__ = ABCMeta
